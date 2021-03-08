@@ -151,7 +151,7 @@ class OdooHandler(object):
 
     def get_kardex_movements(self):
         fields = ["date", "reference", "location_id", "location_dest_id", "create_uid", "product_id", "product_qty"]
-        result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move", "search_read", [[["reference", "=ilike", "B. P./INT/_____"]]], { "fields": fields} )
+        result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move", "search_read", [[["reference", "=ilike", "B. P./INT/%"]]], { "fields": fields} )
         return result
 
     # Student
