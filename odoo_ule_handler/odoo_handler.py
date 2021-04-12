@@ -155,6 +155,12 @@ class OdooHandler(object):
         result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move", "search_read", search_filter, { "fields": fields} )
         return result
 
+    def get_tools_movements(self):
+        fields = ["date", "reference", "location_id", "location_dest_id", "create_uid", "product_id", "product_qty"]
+        search_filter = [[("reference", "=ilike", "B. P./INT/%"), ("state", "=", "done"), "|", ("location_id", "=", 409), ("location_dest_id", "=", 409)]]
+        result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move", "search_read", search_filter, { "fields": fields} )
+        return result
+
     # Student
 
     def get_all_students(self):
