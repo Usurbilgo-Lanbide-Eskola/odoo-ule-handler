@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 # Sales:    sales.order
 # Location: stock.location
 # Movement: stock.move
+# Movement line: stock.move.line
 # Warehouse: stock.warehouse
 # Product Category: product.category
 # Student: op.student
@@ -152,13 +153,13 @@ class OdooHandler(object):
     def get_kardex_movements(self):
         fields = ["date", "reference", "location_id", "location_dest_id", "create_uid", "product_id", "product_qty"]
         search_filter = [[("reference", "=ilike", "B. P./INT/%"), ("state", "=", "done"), "|", ("location_id", "=", 248), ("location_dest_id", "=", 248)]]
-        result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move", "search_read", search_filter, { "fields": fields} )
+        result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move.line", "search_read", search_filter, { "fields": fields} )
         return result
 
     def get_tools_movements(self):
-        fields = ["date", "reference", "location_id", "location_dest_id", "create_uid", "product_id", "product_qty"]
+        fields = ["date", "reference", "location_id", "location_dest_id", "create_uid", "product_id", "qty_done", "product_code_mysql", "date_mysql", "lot_id"]
         search_filter = [[("reference", "=ilike", "B. P./INT/%"), ("state", "=", "done"), "|", ("location_id", "=", 409), ("location_dest_id", "=", 409)]]
-        result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move", "search_read", search_filter, { "fields": fields} )
+        result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move.line", "search_read", search_filter, { "fields": fields } )
         return result
 
     # Student

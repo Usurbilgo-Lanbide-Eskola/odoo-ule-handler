@@ -8,7 +8,7 @@ with open('README.md') as readme_file:
 # This call to setup() does all the work
 setup_args = dict(
     name="odoo-ule-handler",
-    version="0.0.4",
+    version="0.0.5",
     description="Get ULE's Odoo data",
     long_description=README,
     long_description_content_type="text/markdown",
