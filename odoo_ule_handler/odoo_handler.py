@@ -62,6 +62,7 @@ class OdooHandler(object):
         if not self.uid:
             logger.error(f"Connection to the database ('{self.url}') could not be stablisehd")
 
+
     ## User
 
     def search_user_by_name(self, name=None, last_name=None):
@@ -79,16 +80,19 @@ class OdooHandler(object):
     def search_user_by_email(self, email=None):
         if not email:
             logger.error("You must provide an email address")
+            return
 
         result = self.models.execute_kw(self.db, self.uid, self.password, "res.users", "search", [[["email", "=", email]]])
         if len(result) != 1:
             logger.error("More than one (o zero) user with the same email address")
+            return
         return result
 
     def read_user_details(self, user_id, params=None):
         if params:
             if not isinstance(params, list):
                 logger.error("Params must be a list of values!")
+                return
 
         if params:
             result = self.models.execute_kw(self.db, self.uid, self.password, "res.users", "read", [user_id], {"fields": params})
@@ -100,6 +104,7 @@ class OdooHandler(object):
         result = self.read_user_details(user_id, params=[self.RFID_VAR])
         if len(result) != 1:
             logger.error("More than one user with the same id")
+            return
         details = result[0]
         if self.RFID_VAR in details:
             return details.get(self.RFID_VAR)
@@ -120,6 +125,7 @@ class OdooHandler(object):
         else:
             return result
 
+
     ## Products
 
     def get_all_products(self):
@@ -135,12 +141,14 @@ class OdooHandler(object):
         result = self.models.execute_kw(self.db, self.uid, self.password, "product.category", "search_read", [[]], { "fields": fields})
         return result
 
+
     # Locations
 
     def get_all_locations(self):
         fields = ["complete_name", "display_name", "create_date", "equipment_counter", "name", "product_counter", "stock_counter"]
         result = self.models.execute_kw(self.db, self.uid, self.password, "stock.location", "search_read", [[]], { "fields": fields} )
         return result
+
 
     # Movements
 
@@ -162,6 +170,7 @@ class OdooHandler(object):
         result = self.models.execute_kw(self.db, self.uid, self.password, "stock.move.line", "search_read", search_filter, { "fields": fields } )
         return result
 
+
     # Student
 
     def get_all_students(self):
@@ -172,17 +181,74 @@ class OdooHandler(object):
         logger.debug(f"{len(result)} students registered")
         return result
 
+    def search_student_by_identification_code(self, identification_code=None):
+        if not identification_code:
+            logger.error("You must provide an identification code")
+            return
+
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "search", [[["identification_code", "=", identification_code]]])
+        if len(result) != 1:
+            logger.error("More than one (o zero) user with the same identification_code")
+            return
+        return result[0]
+
+    def search_student_by_gr_number(self, gr_number=None):
+        if not gr_number:
+            logger.error("You must provide an student number")
+            return
+
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "search", [[["gr_no", "=", gr_number]]])
+        if len(result) != 1:
+            logger.error("More than one (o zero) user with the same student number")
+            return
+        return result[0]
+
+    def search_student_by_email(self, email=None):
+        if not email:
+            logger.error("You must provide an email address")
+            return
+
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "search", [[["email", "=", email]]])
+        if len(result) != 1:
+            logger.error("More than one (o zero) user with the same email address")
+            return
+        return result[0]
+
+    def get_student_details(self, student_id):
+        if not student_id:
+            logger.error("You must provide a student id")
+            return
+        fields = ["display_name", "email", "zip", "street", "parent_name", "op_student_group_ids", "mobile", "identification_code", "id_number", 
+                    "gender", "country_id", "course_detail_ids", "contact_address", "company_name", "state_id", "op_assignment_ids", "nationality", "name", 
+                    "lang", "id_number", "gr_no", "city", "category_id", "birth_date", "barcode", "user_id"]
+        fields = []
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "read", [student_id], { "fields": fields} )
+        return result
+
+    def get_student_user_id(self, student_id):
+        if not student_id:
+            logger.error("You must provide a student id")
+            return
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "read", [student_id], { "fields": ["user_id"]})
+        if len(result) != 1:
+            logger.error("More than one (or zero) user with the same student id")
+            return
+        user_id = result[0].get("user_id")[0]
+        return user_id
+
+
     # Models
 
-    def get_models(self):
+    def print_models(self):
         fields = ["name", "model"]
         results = self.models.execute_kw(self.db, self.uid, self.password, "ir.model", "search", [[]] )
         result = self.models.execute_kw(self.db, self.uid, self.password, "ir.model", "read", [results], { "fields": fields})
         logger.info(json.dumps(result, sort_keys=True, indent=4))
 
+
     # Help
 
-    def get_model_fields(self, model_name):
+    def print_model_fields(self, model_name):
         attributes = ['string', 'help', 'type']
         fields = self.models.execute_kw(self.db, self.uid, self.password, model_name, 'fields_get', [], {'attributes': attributes})
         logger.info(json.dumps(fields, sort_keys=True, indent=4))
