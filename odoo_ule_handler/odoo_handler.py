@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # Product Category: product.category
 # Student: op.student
 # Student Group: op.student.group
+# Student Course (Enrollment): op.student.course
 # Faculty: op.faculty
 # Course: op.course
 # Classroom: op.classroom
@@ -65,6 +66,13 @@ class OdooHandler(object):
 
     ## User
 
+    def get_all_users(self):
+        fields = ["display_name", "name", "kardex_remstar_xp_rfid", "id_alumno_mysql", "user_cod_mysql", "group_id_mysql",
+                  "propagate_mysql", "name_img_mysql", "identification_code", "zip", "zip_id", "city", "city_id", "email", ]
+        result = self.models.execute_kw(self.db, self.uid, self.password, "res.users", "search_read", [[]], { "fields": fields} )
+        logger.debug(f"{len(result)} users registered")
+        return result
+
     def search_user_by_name(self, name=None, last_name=None):
         if not name:
             logger.error("You must provide at least a name")
@@ -85,6 +93,17 @@ class OdooHandler(object):
         result = self.models.execute_kw(self.db, self.uid, self.password, "res.users", "search", [[["email", "=", email]]])
         if len(result) != 1:
             logger.error("More than one (o zero) user with the same email address")
+            return
+        return result
+
+    def search_user_by_identification_code(self, identification_code=None):
+        if not identification_code:
+            logger.error("You must provide an identification code")
+            return
+
+        result = self.models.execute_kw(self.db, self.uid, self.password, "res.users", "search", [[["identification_code", "=", identification_code]]])
+        if len(result) != 1:
+            logger.error("More than one (o zero) users with the same identification code")
             return
         return result
 
@@ -235,6 +254,25 @@ class OdooHandler(object):
             return
         user_id = result[0].get("user_id")[0]
         return user_id
+
+    
+    # Course
+
+    def get_all_courses(self):
+        fields = ["display_name", "name", "code", "subject_ids", "op_student_course_ids", "op_batch_ids"]
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.course", "search_read", [[]], { "fields": fields} )
+        logger.debug(f"{len(result)} courses registered")
+        return result
+
+
+    # Student course - Enrollment
+
+    def get_all_enrollments(self):
+        fields = ["batch_id", "course_id", "display_name", "student_id", "subject_ids"]
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.student.course", "search_read", [[]], { "fields": fields} )
+        logger.debug(f"{len(result)} student enrollments")
+        return result
+
 
 
     # Models
