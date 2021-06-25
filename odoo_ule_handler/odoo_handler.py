@@ -48,7 +48,7 @@ class OdooHandler(object):
     def connect(self, db=None, user=None, password=None):
         if not db or not user or not password:
             logger.error("You must provide a non empty db, user and password")
-            return
+            raise AttributeError("Non empty db, user and password must be provided")
         
         self.db = db
         self.user = user
@@ -56,12 +56,13 @@ class OdooHandler(object):
 
         if not self.common:
             logger.error(f"Connection to the server ('{self.url}') could not be stablished")
-            return
+            raise ConnectionError("Connection to the server could not be stablished")
 
         self.uid = self.common.authenticate(self.db, self.user, self.password, {})
 
         if not self.uid:
             logger.error(f"Connection to the database ('{self.url}') could not be stablisehd")
+            raise ConnectionRefusedError("User could not be authenticated")
 
 
     ## User
@@ -272,7 +273,6 @@ class OdooHandler(object):
         result = self.models.execute_kw(self.db, self.uid, self.password, "op.student.course", "search_read", [[]], { "fields": fields} )
         logger.debug(f"{len(result)} student enrollments")
         return result
-
 
 
     # Models
