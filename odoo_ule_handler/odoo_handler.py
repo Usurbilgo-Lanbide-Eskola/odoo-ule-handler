@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # Student: op.student
 # Student Group: op.student.group
 # Student Course (Enrollment): op.student.course
-# Faculty: op.faculty
+# Teacher: op.faculty
 # Course: op.course
 # Classroom: op.classroom
 
@@ -208,7 +208,7 @@ class OdooHandler(object):
 
         result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "search", [[["identification_code", "=", identification_code]]])
         if len(result) != 1:
-            logger.error("More than one (o zero) user with the same identification_code")
+            logger.error("More than one (o zero) student with the same identification_code")
             return
         return result[0]
 
@@ -219,7 +219,7 @@ class OdooHandler(object):
 
         result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "search", [[["gr_no", "=", gr_number]]])
         if len(result) != 1:
-            logger.error("More than one (o zero) user with the same student number")
+            logger.error("More than one (o zero) student with the same student number")
             return
         return result[0]
 
@@ -230,7 +230,7 @@ class OdooHandler(object):
 
         result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "search", [[["email", "=", email]]])
         if len(result) != 1:
-            logger.error("More than one (o zero) user with the same email address")
+            logger.error("More than one (o zero) student with the same email address")
             return
         return result[0]
 
@@ -241,7 +241,6 @@ class OdooHandler(object):
         fields = ["display_name", "email", "zip", "street", "parent_name", "op_student_group_ids", "mobile", "identification_code", "id_number", 
                     "gender", "country_id", "course_detail_ids", "contact_address", "company_name", "state_id", "op_assignment_ids", "nationality", "name", 
                     "lang", "id_number", "gr_no", "city", "category_id", "birth_date", "barcode", "user_id"]
-        fields = []
         result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "read", [student_id], { "fields": fields} )
         return result
 
@@ -251,7 +250,61 @@ class OdooHandler(object):
             return
         result = self.models.execute_kw(self.db, self.uid, self.password, "op.student", "read", [student_id], { "fields": ["user_id"]})
         if len(result) != 1:
-            logger.error("More than one (or zero) user with the same student id")
+            logger.error("More than one (or zero) student with the same student id")
+            return
+        user_id = result[0].get("user_id")[0]
+        return user_id
+
+
+    # Teacher
+
+    def get_all_teachers(self):
+        fields = ["display_name", "email", "zip", "street", "parent_name", "mobile", "identification_code", "id_number", 
+                    "gender", "country_id", "contact_address", "company_name", "state_id", "op_assignment_ids", "nationality",
+                    "name",  "lang", "id_number", "city", "category_id", "birth_date", "barcode", "user_id"]
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.faculty", "search_read", [[]], { "fields": fields} )
+        logger.debug(f"{len(result)} teachers registered")
+        return result
+
+    def search_teacher_by_identification_code(self, identification_code=None):
+        if not identification_code:
+            logger.error("You must provide an identification code")
+            return
+
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.faculty", "search", [[["identification_code", "=", identification_code]]])
+        if len(result) != 1:
+            logger.error("More than one (o zero) teacher with the same identification_code")
+            return
+        return result[0]
+
+    def search_teacher_by_email(self, email=None):
+        if not email:
+            logger.error("You must provide an email address")
+            return
+
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.faculty", "search", [[["email", "=", email]]])
+        if len(result) != 1:
+            logger.error("More than one (o zero) teacher with the same email address")
+            return
+        return result[0]
+
+    def get_teacher_details(self, teacher_id):
+        if not teacher_id:
+            logger.error("You must provide a teacher id")
+            return
+        fields = ["display_name", "email", "zip", "street", "parent_name", "mobile", "identification_code", "id_number", 
+                    "gender", "country_id", "contact_address", "company_name", "state_id", "op_assignment_ids", "nationality",
+                    "name",  "lang", "id_number", "city", "category_id", "birth_date", "barcode", "user_id"]
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.faculty", "read", [teacher_id], { "fields": fields} )
+        return result
+
+    def get_teacher_user_id(self, teacher_id):
+        if not teacher_id:
+            logger.error("You must provide a teacher id")
+            return
+        result = self.models.execute_kw(self.db, self.uid, self.password, "op.faculty", "read", [teacher_id], { "fields": ["user_id"]})
+        if len(result) != 1:
+            logger.error("More than one (or zero) teacher with the same teacher id")
             return
         user_id = result[0].get("user_id")[0]
         return user_id
